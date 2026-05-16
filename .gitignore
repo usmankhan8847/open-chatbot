@@ -1,0 +1,58 @@
+# Laravel
+/vendor/
+/node_modules/
+/.env
+/.env.backup
+/.env.production
+/.phpunit.cache
+/phpunit.xml
+*.log
+
+# IDE
+/.idea
+/.vscode
+/.vscode/*
+!.vscode/extensions.json
+/.nova
+/.zed
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+/public/build
+/public/hot
+/public/storage
+/public/fonts-manifest.dev.json
+
+# Cache
+/storage/*.key
+/storage/pail
+/.codex
+/.cursor
+
+# PHP
+_ide_helper.php
+.phpactor.json
+
+# Composer
+/auth.json
+
+# Misc
+Homestead.json
+Homestead.yaml
+
+# Storage cache (compiled views, etc.)
+storage/framework/cache/data/
+storage/framework/views/*.php
+storage/framework/views/*.tmp
+
+# Keep these (empty folders that should exist)
+!/storage/app/public/.gitkeep
+!/storage/framework/cache/.gitkeep
+!/storage/framework/sessions/.gitkeep
+!/storage/framework/views/.gitkeep
+!/storage/logs/.gitkeep
