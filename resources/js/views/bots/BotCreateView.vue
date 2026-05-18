@@ -154,17 +154,17 @@
               <label for="ai_model" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Model <span class="text-red-500">*</span>
               </label>
-              <span v-if="models.length" class="text-[10px] text-emerald-500 flex items-center space-x-1">
+              <span v-if="models?.length" class="text-[10px] text-emerald-500 flex items-center space-x-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
-                <span>{{ models.length }} models loaded</span>
+                <span>{{ models?.length }} models loaded</span>
               </span>
             </div>
 
             <!-- Dropdown (models loaded) -->
             <select
-              v-if="models.length > 0"
+              v-if="models?.length > 0"
               v-model="form.ai_model"
               id="ai_model"
               class="input-field text-sm"
@@ -260,7 +260,7 @@
           ></textarea>
           <div class="flex items-center justify-between">
             <p class="text-xs text-gray-700">Tip: Be specific about tone, scope, and limitations.</p>
-            <span class="text-xs text-gray-700">{{ form.system_prompt.length }} chars</span>
+            <span class="text-xs text-gray-700">{{ form.system_prompt?.length || 0 }} chars</span>
           </div>
         </div>
       </section>
@@ -376,7 +376,13 @@ const handleSubmit = async () => {
   error.value   = '';
   loading.value = true;
   try {
-    const { data } = await botService.createBot(form);
+    const payload = { ...form };
+    if (payload.allowed_domains && typeof payload.allowed_domains === 'string') {
+      payload.allowed_domains = payload.allowed_domains.split(',').map(d => d.trim()).filter(d => d);
+    } else {
+      payload.allowed_domains = null;
+    }
+    const { data } = await botService.createBot(payload);
     router.push(`/bots/${data.id}/edit`);
   } catch (e) {
     error.value = e.response?.data?.message ?? 'Failed to create chatbot. Please check your inputs.';

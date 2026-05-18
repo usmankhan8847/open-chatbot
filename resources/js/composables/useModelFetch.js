@@ -33,7 +33,7 @@ export function useModelFetch() {
         models.value         = [];
 
         try {
-            const { data } = await api.post('/auth/models/fetch', {
+            const { data } = await api.post('/models/fetch', {
                 provider,
                 api_key: apiKey,
             });
@@ -43,7 +43,14 @@ export function useModelFetch() {
                 fetchError.value = 'No models returned. Check your API key and provider.';
             }
         } catch (err) {
-            const msg = err.response?.data?.error ?? 'Failed to fetch models. Please verify your API key.';
+            let msg = 'Failed to fetch models. Please verify your API key.';
+            if (err.response?.data?.details) {
+                msg = err.response.data.details;
+            } else if (err.response?.data?.message) {
+                msg = err.response.data.message;
+            } else if (err.response?.data?.error) {
+                msg = err.response.data.error;
+            }
             fetchError.value = msg;
             models.value     = [];
         } finally {

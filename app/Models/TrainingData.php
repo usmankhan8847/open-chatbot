@@ -30,8 +30,13 @@ class TrainingData extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'data',
         'bot_id',
+        'file_name',
+        'file_path',
+        'file_type',
+        'content',
+        'original_url',
+        'status',
     ];
 
     /**

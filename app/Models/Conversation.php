@@ -29,7 +29,6 @@ class Conversation extends Model
     protected $fillable = [
         'visitor_id',
         'visitor_name',
-        'title',
         'bot_id',
         'started_at',
     ];

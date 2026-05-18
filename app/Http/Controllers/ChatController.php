@@ -50,7 +50,6 @@ class ChatController extends Controller
                 ],
                 [
                     'visitor_name' => $request->visitor_name ?? 'Visitor',
-                    'title' => 'Chat with ' . $bot->name,
                     'started_at' => now(),
                 ]
             );
@@ -76,9 +75,23 @@ class ChatController extends Controller
                 })
                 ->toArray();
 
+            // Load Knowledge Base (Training Data)
+            $knowledge = \App\Models\TrainingData::where('bot_id', $bot->id)
+                ->where('status', 'completed')
+                ->get()
+                ->pluck('content')
+                ->filter()
+                ->implode("\n\n");
+
+            $systemPrompt = $bot->system_prompt ?? 'You are a helpful assistant.';
+            if (!empty($knowledge)) {
+                $systemPrompt .= "\n\nUSE THE FOLLOWING KNOWLEDGE TO ANSWER THE USER:\n" . $knowledge;
+            }
+
             // Call AI Service
+            $this->aiService->setBotConfig($bot);
             $aiReply = $this->aiService->sendMessage(
-                $bot->system_prompt ?? 'You are a helpful assistant.',
+                $systemPrompt,
                 $history
             );
 
@@ -100,5 +113,35 @@ class ChatController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get chat history for the visitor.
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function history(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'bot_id' => 'required|exists:bots,id',
+            'visitor_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $conversation = Conversation::where('bot_id', $request->bot_id)
+            ->where('visitor_id', $request->visitor_id)
+            ->first();
+
+        if (!$conversation) {
+            return response()->json(['messages' => []]);
+        }
+
+        $messages = $conversation->messages()->oldest()->get(['role', 'content']);
+
+        return response()->json(['messages' => $messages]);
     }
 }

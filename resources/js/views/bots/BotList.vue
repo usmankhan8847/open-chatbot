@@ -204,7 +204,7 @@ const filteredBots = computed(() => {
 const fetchData = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get('/api/bots');
+    const { data } = await api.get('/bots');
     bots.value = data;
   } catch (e) {
     console.error('Failed to fetch bots:', e);
@@ -213,10 +213,31 @@ const fetchData = async () => {
   }
 };
 
-const copyEmbedCode = (botId) => {
+const copyEmbedCode = async (botId) => {
   const origin = window.location.origin;
   const code   = `<script src="${origin}/embed.js" data-bot-id="${botId}"><\/script>`;
-  navigator.clipboard.writeText(code);
+  
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  } else {
+    const textArea = document.createElement("textarea");
+    textArea.value = code;
+    textArea.style.position = "absolute";
+    textArea.style.left = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+    }
+    textArea.remove();
+  }
+  
   copiedId.value = botId;
   setTimeout(() => (copiedId.value = null), 2000);
 };
@@ -226,7 +247,7 @@ const editBot   = (bot) => router.push(`/bots/${bot.id}/edit`);
 const deleteBot = async (id) => {
   if (!confirm('Delete this bot? This action cannot be undone.')) return;
   try {
-    await api.delete(`/api/bots/${id}`);
+    await api.delete(`/bots/${id}`);
     bots.value = bots.value.filter(b => b.id !== id);
   } catch (e) {
     console.error('Failed to delete bot:', e);

@@ -12,6 +12,8 @@ class AIService
     protected string $apiKey;
     protected string $model;
     protected ?string $baseUrl;
+    protected float $temperature = 0.7;
+    protected int $maxTokens = 2048;
 
     public function __construct()
     {
@@ -19,6 +21,17 @@ class AIService
         $this->apiKey = env('AI_API_KEY', '');
         $this->model = env('AI_MODEL', 'gpt-3.5-turbo');
         $this->baseUrl = env('AI_BASE_URL');
+    }
+
+    public function setBotConfig($bot): self
+    {
+        $this->provider = $bot->ai_provider ?? $this->provider;
+        $this->apiKey = $bot->api_key ?? $this->apiKey;
+        $this->model = $bot->ai_model ?? $this->model;
+        $this->temperature = (float) ($bot->temperature ?? $this->temperature);
+        $this->maxTokens = (int) ($bot->max_tokens ?? $this->maxTokens);
+        
+        return $this;
     }
 
     /**
@@ -65,6 +78,8 @@ class AIService
             ->post($url, [
                 'model' => $this->model,
                 'messages' => $messages,
+                'temperature' => $this->temperature,
+                'max_tokens' => $this->maxTokens,
             ]);
 
         if ($response->failed()) {
@@ -97,7 +112,8 @@ class AIService
             'model' => $this->model,
             'system' => $system,
             'messages' => $userMessages,
-            'max_tokens' => 1024,
+            'temperature' => $this->temperature,
+            'max_tokens' => $this->maxTokens,
         ]);
 
         if ($response->failed()) {
@@ -123,6 +139,10 @@ class AIService
 
         $response = Http::post($url, [
             'contents' => $contents,
+            'generationConfig' => [
+                'temperature' => $this->temperature,
+                'maxOutputTokens' => $this->maxTokens,
+            ],
         ]);
 
         if ($response->failed()) {
@@ -144,6 +164,8 @@ class AIService
             ->post($url, [
                 'model' => $this->model,
                 'messages' => $messages,
+                'temperature' => $this->temperature,
+                'max_tokens' => $this->maxTokens,
             ]);
 
         if ($response->failed()) {
@@ -163,6 +185,8 @@ class AIService
             ->post($this->baseUrl, [
                 'model' => $this->model,
                 'messages' => $messages,
+                'temperature' => $this->temperature,
+                'max_tokens' => $this->maxTokens,
             ]);
 
         if ($response->failed()) {

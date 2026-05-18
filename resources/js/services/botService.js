@@ -7,8 +7,11 @@ export const botService = {
     updateBot:     (id, data)=> api.put(`/bots/${id}`, data),
     deleteBot:     (id)      => api.delete(`/bots/${id}`),
 
-    // Training documents
-    getDocuments:    (botId)       => api.get(`/bots/${botId}/documents`),
-    uploadDocument:  (botId, data) => api.post(`/bots/${botId}/documents`, data),
-    deleteDocument:  (botId, docId)=> api.delete(`/bots/${botId}/documents/${docId}`),
+    // Training data (Knowledge Base)
+    getTrainingData:   (botId)       => api.get(`/bots/${botId}/training`),
+    uploadTrainingFile: (botId, formData) => api.post(`/bots/${botId}/training`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    scrapeWebsite:     (botId, url)  => api.post(`/bots/${botId}/training`, { url }),
+    deleteTrainingData: (id)         => api.delete(`/bots/training/${id}`),
 };

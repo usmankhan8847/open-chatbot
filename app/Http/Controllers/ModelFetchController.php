@@ -39,7 +39,7 @@ class ModelFetchController extends Controller
             return response()->json([
                 'error'   => 'Failed to fetch models from provider.',
                 'details' => $e->getMessage(),
-            ], 422);
+            ], 400);
         }
     }
 

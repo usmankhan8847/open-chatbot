@@ -26,6 +26,7 @@
 
     // State
     let isOpen = false;
+    let hasLoadedHistory = false;
     let visitorId = localStorage.getItem('botforge_visitor_id');
     if (!visitorId) {
         visitorId = 'v_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -360,7 +361,7 @@
                 </div>
             </div>
             <div class="chat-messages" id="bf-messages">
-                <div class="message bot">Hi there! 👋 I'm your AI assistant. How can I help you today?</div>
+                <div class="message bot" id="bf-greeting">Hi there! 👋 I'm your AI assistant. How can I help you today?</div>
             </div>
             <div class="chat-input-wrapper">
                 <div class="chat-input-container">
@@ -399,6 +400,10 @@
             closeIcon.style.display = 'block';
             input.focus();
             scrollToBottom();
+            
+            if (!hasLoadedHistory) {
+                loadHistory();
+            }
         } else {
             chatIcon.style.display = 'block';
             closeIcon.style.display = 'none';
@@ -431,6 +436,39 @@
         if (indicator) indicator.remove();
     }
 
+    async function loadHistory() {
+        hasLoadedHistory = true;
+        showLoading();
+        
+        try {
+            const response = await fetch(`${API_URL}/api/chat/history?bot_id=${BOT_ID}&visitor_id=${visitorId}`);
+            if (!response.ok) throw new Error('Failed to load history');
+            
+            const data = await response.json();
+            hideLoading();
+            
+            if (data.messages && data.messages.length > 0) {
+                // Clear greeting and add history
+                messagesContainer.innerHTML = '';
+                
+                // Keep the greeting if we want, or just let history replace it. Let's add the greeting first.
+                const greeting = document.createElement('div');
+                greeting.className = 'message bot';
+                greeting.textContent = "Hi there! 👋 I'm your AI assistant. How can I help you today?";
+                messagesContainer.appendChild(greeting);
+                
+                data.messages.forEach(msg => {
+                    // Assistant messages from history come with role 'assistant', embed.js expects 'bot'
+                    const roleClass = msg.role === 'assistant' ? 'bot' : msg.role;
+                    addMessage(msg.content, roleClass);
+                });
+            }
+        } catch (error) {
+            hideLoading();
+            console.error('OpenChatbot History Error:', error);
+        }
+    }
+
     async function sendMessage() {
         const text = input.value.trim();
         if (!text) return;
@@ -457,7 +495,11 @@
                 })
             });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Backend Error:', errorData);
+                throw new Error(errorData.message || 'Network response was not ok');
+            }
 
             const data = await response.json();
             hideLoading();

@@ -31,6 +31,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // AI Model Discovery
     Route::post('/models/fetch', [\App\Http\Controllers\ModelFetchController::class, 'fetch']);
+
+    // Training Data
+    Route::get('/bots/{bot}/training', [\App\Http\Controllers\TrainingController::class, 'index']);
+    Route::post('/bots/{bot}/training', [\App\Http\Controllers\TrainingController::class, 'store']);
+    Route::delete('/bots/training/{id}', [\App\Http\Controllers\TrainingController::class, 'destroy']);
 });
 
 Route::post('/chat', [\App\Http\Controllers\ChatController::class, 'chat']);
+Route::get('/chat/history', [\App\Http\Controllers\ChatController::class, 'history']);

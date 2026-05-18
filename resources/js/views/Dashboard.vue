@@ -260,7 +260,7 @@ const editBot   = (bot) => router.push(`/bots/${bot.id}/edit`);
 const deleteBot = async (id) => {
   if (!confirm('Delete this bot? This action cannot be undone.')) return;
   try {
-    await api.delete(`/api/bots/${id}`);
+    await api.delete(`/bots/${id}`);
     bots.value = bots.value.filter(b => b.id !== id);
     const res  = await api.get('/analytics/overview');
     overview.value = res.data;
@@ -274,7 +274,7 @@ const fetchData = async () => {
   try {
     const [ovRes, botsRes] = await Promise.all([
       api.get('/analytics/overview'),
-      api.get('/api/bots'),
+      api.get('/bots'),
     ]);
     overview.value = ovRes.data;
     bots.value     = botsRes.data;
