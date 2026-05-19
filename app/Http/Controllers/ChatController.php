@@ -140,8 +140,15 @@ class ChatController extends Controller
             return response()->json(['messages' => []]);
         }
 
-        $messages = $conversation->messages()->oldest()->get(['role', 'content']);
+        $paginator = $conversation->messages()->oldest()->paginate(50, ['role', 'content']);
 
-        return response()->json(['messages' => $messages]);
+        return response()->json([
+            'messages' => $paginator->items(),
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+            ]
+        ]);
     }
 }
