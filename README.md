@@ -517,31 +517,65 @@ php --version
 
 ---
 
-## 🚢 Production Deployment
+## 🚢 Deployment (Hostinger)
 
-> For production, always use a proper web server (Nginx/Apache) and a process manager.
+This guide covers deploying the application to **Hostinger** (Shared Web Hosting / hPanel).
 
+### Step 1: Prepare Your Project Locally
+Before uploading to Hostinger, prepare the production build:
 ```bash
-# 1. Set environment to production
-APP_ENV=production
-APP_DEBUG=false
-
-# 2. Install dependencies (no dev)
+# 1. Install dependencies
 composer install --optimize-autoloader --no-dev
+npm install
 
-# 3. Build frontend assets
+# 2. Build frontend assets
 npm run build
-
-# 4. Optimize Laravel
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# 5. Run migrations
-php artisan migrate --force
 ```
+Once complete, compress your entire project folder into a `.zip` file (you can exclude the `node_modules` folder to save upload time).
 
-Point your web server document root to the `public/` directory.
+### Step 2: Upload Files via File Manager
+1. Log into your Hostinger **hPanel** and go to **Files → File Manager**.
+2. Navigate to `public_html` (or your add-on domain's folder).
+3. Upload the `.zip` file you created and extract it.
+4. Make sure all the extracted files (including `.env.example`, `app/`, `public/`, etc.) are placed directly in `public_html`.
+
+### Step 3: Update Document Root
+Laravel requires the document root to point to the `public/` directory for security.
+1. In hPanel, go to **Advanced → PHP Configuration** and ensure you're using **PHP 8.3 or 8.4**.
+2. Go to **Websites → Manage → Advanced → Document Root** (or search for "Document Root").
+3. Update the document root path from `public_html` to `public_html/public`.
+
+### Step 4: Configure Database & Environment
+1. In hPanel, go to **Databases → Management** and create a new MySQL database and user.
+2. In the File Manager, rename `.env.example` to `.env`.
+3. Open the `.env` file and update these values:
+   ```env
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://yourdomain.com
+   
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_DATABASE=u123456789_open_chatbot
+   DB_USERNAME=u123456789_user
+   DB_PASSWORD=your_secure_password
+   ```
+
+### Step 5: Run Migrations
+Hostinger provides **SSH Access** on most plans.
+1. Go to **Advanced → SSH Access** and connect via terminal.
+2. Navigate to your project folder: `cd domains/yourdomain.com/public_html`
+3. Run the final setup commands:
+   ```bash
+   php artisan key:generate
+   php artisan migrate --force
+   php artisan storage:link
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+
+> **No SSH Access?** You can export your local database via phpMyAdmin and import it into Hostinger's phpMyAdmin. Then, generate an `APP_KEY` locally using `php artisan key:generate --show` and paste it into your Hostinger `.env` file.
 
 ---
 
