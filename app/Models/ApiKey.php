@@ -38,6 +38,6 @@ class ApiKey extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
-        'api_key' => 'encrypted',
+        'api_key' => \App\Casts\EncryptedWithFallback::class,
     ];
 }
