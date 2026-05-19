@@ -30,7 +30,7 @@ class ChatController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'bot_id' => 'required|exists:bots,id',
-            'visitor_id' => 'required|string',
+            'visitor_id' => 'required|string|alpha_dash|min:10|max:50',
             'visitor_name' => 'nullable|string',
             'message' => 'required|string',
         ]);
@@ -125,7 +125,7 @@ class ChatController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'bot_id' => 'required|exists:bots,id',
-            'visitor_id' => 'required|string',
+            'visitor_id' => 'required|string|alpha_dash|min:10|max:50',
         ]);
 
         if ($validator->fails()) {

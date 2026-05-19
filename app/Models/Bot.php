@@ -55,6 +55,7 @@ class Bot extends Model
         'temperature' => 'float',
         'max_tokens' => 'integer',
         'is_active' => 'boolean',
+        'api_key' => 'encrypted',
     ];
 
     /**

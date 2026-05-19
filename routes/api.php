@@ -38,5 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/bots/training/{id}', [\App\Http\Controllers\TrainingController::class, 'destroy']);
 });
 
-Route::post('/chat', [\App\Http\Controllers\ChatController::class, 'chat']);
-Route::get('/chat/history', [\App\Http\Controllers\ChatController::class, 'history']);
+Route::middleware('throttle:30,1')->group(function () {
+    Route::post('/chat', [\App\Http\Controllers\ChatController::class, 'chat']);
+    Route::get('/chat/history', [\App\Http\Controllers\ChatController::class, 'history']);
+});
